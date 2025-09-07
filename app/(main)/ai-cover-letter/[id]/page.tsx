@@ -1,8 +1,14 @@
-import React from 'react';
-const  CoverLetter = async({params}) => {
-	const id = await params.id;
-	return <div className="">
-	CoverLetter: {id}
-	</div>
+import React from "react";
+
+interface Props {
+  params: {
+    id: any;
+  };
 }
-export default CoverLetter
+
+const CoverLetter = async ({ params }: Props) => {
+  const id = params.id;
+  return <div>CoverLetter: {id}</div>;
+};
+
+export default CoverLetter;
