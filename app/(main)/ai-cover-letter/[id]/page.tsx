@@ -1,16 +1,12 @@
 import React from "react";
 
-type Props = {
-  params: { id: string };
+interface Props = {
+  params: Promise<{ id: string }>;
 };
 
-const CoverLetter = ({ params }: Props) => {
-  const { id } = params;
-  return (
-    <div>
-      CoverLetter: {id}
-    </div>
-  );
+const CoverLetter = async ({ params }: Props) => {
+  const { id } = await params;
+  return <div>CoverLetter: {id}</div>;
 };
 
 export default CoverLetter;

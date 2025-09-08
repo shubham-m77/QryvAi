@@ -18,7 +18,7 @@ export const updateUser = async (data: any) => {
         return redirect("/sign-in");
     }
     try {
-        const result = await db.$transaction(async (tx) => {
+        const result = await db.$transaction(async (tx: any) => {
             // find if the industry exists
             let industryInsight = await tx.industryInsight.findUnique({
                 where: {
