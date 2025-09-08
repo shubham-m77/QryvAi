@@ -14,6 +14,6 @@ export async function generateQuiz() {
         where: { id: userId }
     })
     if (!user) throw new Error("User not found!")
-    const prompt = `Generate 10 technical interview questions for a ${user.skills.}`
+    // const prompt = `Generate 10 technical interview questions for a ${user.skills.}`
 
 }
