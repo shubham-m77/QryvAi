@@ -9,7 +9,9 @@ CREATE TABLE "public"."User" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "name" TEXT,
-    "imageUrl" TEXT,
+    "image" TEXT,
+    "password" TEXT,
+    "emailVerified" TIMESTAMP(3),
     "industry" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -18,6 +20,13 @@ CREATE TABLE "public"."User" (
     "skills" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."VerificationToken" (
+    "identifier" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "expires" TIMESTAMP(3) NOT NULL
 );
 
 -- CreateTable
@@ -89,8 +98,8 @@ CREATE TABLE "public"."CoverLetter" (
 
 -- CreateTable
 CREATE TABLE "public"."IndustryInsight" (
+    "id" TEXT NOT NULL,
     "industry" TEXT NOT NULL,
-    "insights" TEXT NOT NULL,
     "salaryRange" JSONB[],
     "growthRate" DOUBLE PRECISION,
     "demandLevel" "public"."DemandLevel" NOT NULL,
@@ -101,11 +110,17 @@ CREATE TABLE "public"."IndustryInsight" (
     "lastUpdated" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "nextUpdate" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "IndustryInsight_pkey" PRIMARY KEY ("industry")
+    CONSTRAINT "IndustryInsight_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "public"."User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "VerificationToken_token_key" ON "public"."VerificationToken"("token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "VerificationToken_identifier_token_key" ON "public"."VerificationToken"("identifier", "token");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "public"."Account"("provider", "providerAccountId");
@@ -124,6 +139,9 @@ CREATE INDEX "Resume_userId_idx" ON "public"."Resume"("userId");
 
 -- CreateIndex
 CREATE INDEX "CoverLetter_userId_idx" ON "public"."CoverLetter"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "IndustryInsight_industry_key" ON "public"."IndustryInsight"("industry");
 
 -- CreateIndex
 CREATE INDEX "IndustryInsight_industry_idx" ON "public"."IndustryInsight"("industry");

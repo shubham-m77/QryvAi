@@ -38,7 +38,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="w-full flex items-center justify-center">
+    <div className="w-full flex items-center justify-center mt-16">
       <Card className="w-full max-w-md rounded-2xl shadow-xl">
         <CardHeader>
           <CardTitle className="text-center text-2xl gap-x-1.5 font-bold flex items-center justify-center ">Welcome back to <Link

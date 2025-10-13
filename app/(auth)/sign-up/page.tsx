@@ -50,7 +50,7 @@ export default function SignupPage() {
 
 
   return (
-    <div className="w-full flex items-center justify-center mt-14">
+    <div className="w-full flex items-center justify-center mt-16">
       <Card className="w-full max-w-md shadow-xl rounded-2xl">
         <CardHeader className="">
           <CardTitle className="text-center text-2xl gap-x-1.5 font-bold flex items-center justify-center ">Welcome to <Link

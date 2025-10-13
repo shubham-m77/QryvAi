@@ -30,7 +30,7 @@ const HeroSection = () => {
     <section className='w-full pt-12 md:pt-16 pb-10 flex items-center flex-col justify-center'>
       <div className='space-y-6'>
         <div className='space-y-7 flex items-center justify-center flex-col text-center'>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-novatica font-bold text-center bg-gradient-to-r from-[#60a5fa] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent animate-gradient">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-novatica text-tight font-bold text-center bg-gradient-to-r from-[#60a5fa] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent animate-gradient">
             Your AI Companion for <br /> Career Growth
           </h1>
 

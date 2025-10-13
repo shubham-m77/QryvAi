@@ -9,13 +9,12 @@ export const updateUser = async (data: any) => {
     const session = await auth();
 
     if (!session?.user?.id) {
-        return redirect("/sign-in"); // or just redirect("/sign-in")
+        throw new Error("Unauthorized!");
     }
-
     const userId = session.user.id;
     const user = await db.user.findUnique({ where: { id: userId } });
     if (!user) {
-        return redirect("/sign-in");
+        throw new Error("User not found!");
     }
     try {
         const result = await db.$transaction(async (tx: any) => {
@@ -58,7 +57,7 @@ export const getUserOnboardingStatus = async () => {
     const session = await auth();
     const userId = session?.user?.id;
     if (!userId) {
-        redirect("/sign-in");
+        throw new Error("Unauthorized!");
     }
     const user = await db.user.findUnique({ where: { id: userId } });
     if (!user) throw new Error("User not found");

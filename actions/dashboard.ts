@@ -12,7 +12,7 @@ const model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash"
 });
 
-export const generateAIInsights = async (industry: any): Promise<any> => {
+export const generateAIInsights = async (industry: string) => {
     const prompt = `
           Analyze the current state of the ${industry} industry and provide insights in ONLY the following JSON format without any additional notes or explanations:
           {
@@ -48,16 +48,45 @@ export const getIndustryInsights = async () => {
     });
     if (!user) throw new Error("User not found");
     if (!user?.industryInsights) {
-        const insights = await generateAIInsights(user.industry);
-        if (!user.industry) throw new Error("User industry not found");
-        const industryInsight = await db.industryInsight.create({
-            data: {
-                industry: user.industry,
-                ...insights,
-                nextUpdate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) // 7 days from now
-            }
-        });
-        return industryInsight;
+        // Ensure the user has an industry before calling the AI
+        if (!user.industry) {
+            // Gracefully return a value the client can handle (no 500)
+            // The client should detect this and show onboarding/placeholder UI
+            return null;
+        }
+
+        // Call AI and parse defensively
+        let parsed: any = null;
+        try {
+            const insightsText = await generateAIInsights(user.industry);
+            // If generateAIInsights already returns parsed JSON, use it; otherwise ensure it's an object
+            parsed = insightsText && typeof insightsText === 'object' ? insightsText : insightsText;
+        } catch (err: any) {
+            console.error('Failed to generate AI insights:', err?.message ?? err);
+            return null; // fail gracefully
+        }
+
+        // Minimal validation / mapping before sending to DB
+        const dataForDb: Object = {
+            industry: user.industry,
+            // Map expected fields with defaults
+            salaryRanges: parsed?.salaryRanges ?? parsed?.salaryRange ?? [],
+            growthRate: parsed?.growthRate ?? null,
+            demandLevel: (parsed?.demandLevel ?? null),
+            topSkills: parsed?.topSkills ?? [],
+            marketOutlook: parsed?.marketOutlook ?? null,
+            keyTrends: parsed?.keyTrends ?? [],
+            recommendedSkills: parsed?.recommendedSkills ?? [],
+            nextUpdate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
+        };
+
+        try {
+            const industryInsight = await db.industryInsight.create({ data: dataForDb });
+            return industryInsight;
+        } catch (err: any) {
+            console.error('Failed to save industry insight:', err?.message ?? err);
+            return null;
+        }
     }
     return user.industryInsights;
 };

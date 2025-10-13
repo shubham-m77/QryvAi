@@ -91,7 +91,7 @@ model CoverLetter {
   id             String   @id @default(uuid())
   userId         String
   content        String
-  jonDescription String?
+  jobDescription String?
   companyName    String
   jobTitle       String
   createdAt      DateTime @default(now())

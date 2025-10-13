@@ -1,8 +1,10 @@
 
 import { NextResponse } from "next/server"
+export const runtime = 'nodejs'
 import { db } from "@/lib/prisma"
 import { signupSchema } from "@/lib/validations"
 import { hashPassword } from "@/lib/helpers/password"
+
 
 export async function POST(req: Request) {
   try {

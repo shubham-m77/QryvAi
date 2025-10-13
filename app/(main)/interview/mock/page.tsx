@@ -1,7 +1,21 @@
-import React from 'react';
-const  MockInterview = () => {
-	return <div className="">
-	
+import { Button } from "@/components/ui/button"
+import { ArrowLeft } from "lucide-react"
+import Link from "next/link"
+import { Quiz } from "../_components/quiz"
+
+const MockInterview = () => {
+	return <div className="container mx-auto space-y-4 py-6">
+		<div className="flex flex-col space-y-2 mx-2">
+			<Link href="/interview">
+				<Button variant="link" className="gap-2 pl-0"><ArrowLeft className="size-4" />Back to Interview Prep...</Button>
+			</Link>
+
+			<div>
+				<h1 className="text-5xl font-bold gradient-title">Mock Interview</h1>
+				<p className="text-muted-foreground text-sm">Test your knowledge with your industry-specific questions.</p>
+			</div>
+		</div>
+		<Quiz />
 	</div>
 }
 export default MockInterview
