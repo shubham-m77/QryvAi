@@ -12,31 +12,27 @@ export const updateUser = async (data: any) => {
         throw new Error("Unauthorized!");
     }
     const userId = session.user.id;
-    const user = await db.user.findUnique({ where: { id: userId } });
-    if (!user) {
-        throw new Error("User not found!");
-    }
+
     try {
         const result = await db.$transaction(async (tx: any) => {
-            // find if the industry exists
             let industryInsight = await tx.industryInsight.findUnique({
                 where: {
-                    industry: data.industry
-                }
+                    industry: data.industry,
+                },
             });
-            // if industry doesn't exist, create it with default values - will replace it with ai later
+
             if (!industryInsight) {
                 const insights = await generateAIInsights(data.industry);
                 if (!data.industry) throw new Error("User industry not found");
-                industryInsight = await db.industryInsight.create({
+                industryInsight = await tx.industryInsight.create({
                     data: {
                         industry: data.industry,
                         ...insights,
-                        nextUpdate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) // 7 days from now
-                    }
+                        nextUpdate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+                    },
                 });
             }
-            // update the user
+
             const updatedUser = await tx.user.update({
                 where: { id: userId },
                 data: {
@@ -44,27 +40,36 @@ export const updateUser = async (data: any) => {
                     experience: data.experience,
                     bio: data.bio,
                     skills: data.skills,
-                }
+                },
             });
+
             return { updatedUser, industryInsight };
-        }, { timeout: 10000 })
+        }, { timeout: 10000 });
+
         return { success: true, ...result };
     } catch (error: any) {
-        throw new Error("Failed to update user" + error.message);
+        throw new Error("Failed to update user: " + error.message);
     }
-}
+};
+
 export const getUserOnboardingStatus = async () => {
     const session = await auth();
     const userId = session?.user?.id;
+
     if (!userId) {
         throw new Error("Unauthorized!");
     }
-    const user = await db.user.findUnique({ where: { id: userId } });
-    if (!user) throw new Error("User not found");
+
     try {
-        const user = await db.user.findUnique({ where: { id: userId }, select: { industry: true } });
-        return { isOnboarded: !!user?.industry };
+        const user = await db.user.findUnique({
+            where: { id: userId },
+            select: { industry: true },
+        });
+
+        if (!user) throw new Error("User not found");
+
+        return { isOnboarded: !!user.industry };
     } catch (error: any) {
-        throw new Error("Failed to get onboarding status ");
+        throw new Error("Failed to get onboarding status: " + error.message);
     }
-}
+};
