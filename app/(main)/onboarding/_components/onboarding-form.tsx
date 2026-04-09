@@ -53,7 +53,7 @@ const OnboardingForm = ({ industries }: { industries: Industry[] }) => {
         <div className="flex items-center justify-center bg-background">
             <Card className="w-full max-w-lg mt-10 mx-2">
                 <CardHeader>
-                    <CardTitle className="gradient-title text-4xl ">Complet Your Profile</CardTitle>
+                    <CardTitle className="gradient-title text-4xl ">Complete Your Profile</CardTitle>
                     <CardDescription>Select your industry to get personalized career insights and recomemendations.</CardDescription>
                 </CardHeader>
                 <CardContent>

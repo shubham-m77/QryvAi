@@ -20,5 +20,4 @@ const AICoverLetterPage = async () => {
 		<CoverLetterList coverLetters={coverLetters} />
 	</div>
 }
-}
 export default AICoverLetterPage

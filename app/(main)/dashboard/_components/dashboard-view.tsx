@@ -1,4 +1,4 @@
-// 'use client';
+'use client';
 import { Brain, LineChart, TrendingDown, TrendingUp } from 'lucide-react'
 import React from 'react'
 import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';

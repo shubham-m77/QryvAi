@@ -51,7 +51,7 @@ const Header = () => {
           ? { width: "100%", borderRadius: "0px", marginTop: 0 }
           : { width: "90%", borderRadius: "9999px", marginTop: 20 }
       }
-      transition={{ duration: 0.3, ease: "easeInOut" }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
       className="fixed top-0 z-[100]"
     >
       {/* Outer border */}
