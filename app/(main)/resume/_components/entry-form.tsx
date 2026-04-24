@@ -80,8 +80,10 @@ const EntryForm = ({ type, entries, onChange }: { type: string, entries: any[], 
             toast.success("Description Improved!");
         }
         if (improveError) {
-
-            toast.error("Failed to improve message~", improveError.message);
+            const errorMessage = typeof improveError === "object" && improveError !== null && "message" in improveError
+                ? (improveError as { message?: string }).message
+                : String(improveError);
+            toast.error(`Failed to improve message: ${errorMessage}`);
         }
     }, [improveError, improvedContent, isImproving])
     return (
@@ -145,12 +147,13 @@ const EntryForm = ({ type, entries, onChange }: { type: string, entries: any[], 
                                     }
                                 </div>
                             </div>
-                            <div className="flex items-center space-x-2">
-                                <Input type="checkbox" id="current" {...register('current')} onChange={(e) => {
+                            <div className="flex items-center space-x-2 ">
+                                 <Label htmlFor="current">Current {type}</Label>
+                                <Input type="checkbox" className="w-auto" id="current" {...register('current')} onChange={(e) => {
                                     setValue("current", e.target.checked);
                                     if (e.target.checked) setValue("endDate", "")
                                 }} />
-                                <Label htmlFor="current">Current {type}</Label>
+                               
                             </div>
                             <div className="space-y-2">
                                 <Textarea
@@ -169,6 +172,7 @@ const EntryForm = ({ type, entries, onChange }: { type: string, entries: any[], 
                                 type="button"
                                 variant={"ghost"}
                                 size="sm"
+                                className="cursor-pointer"
                                 onClick={handleImproveDescription}
                                 disabled={isImproving || !watch("description")}
                             >

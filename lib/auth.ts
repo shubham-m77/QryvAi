@@ -1,5 +1,7 @@
 // lib/auth.ts
 import NextAuth from "next-auth"
+import type { Account, Profile, User, Session } from "next-auth"
+import type { JWT } from "next-auth/jwt"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import Google from "next-auth/providers/google"
 import Credentials from "next-auth/providers/credentials"
@@ -21,17 +23,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials: Object) {
+      async authorize(credentials: Record<string, unknown> | undefined) {
         const data = signinSchema.safeParse(credentials)
         if (!data.success) return null;
-        const { email, password } = data?.data;
+        const { email, password } = data.data;
 
         if (!email || !password) return null
 
         const user = await db.user.findUnique({
-          where: { email: email },
+          where: { email },
         })
-        if (!user || !password || !user.password) return null
+        if (!user || !user.password) return null
 
         const valid = await verifyPassword(password, user.password)
         if (!valid) return null
@@ -42,8 +44,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   session: { strategy: "jwt" },
   callbacks: {
-    // Link Google account to existing user if emails match
-    async signIn({ user, account, profile }: { user: any, account?: any, profile?: any }) {
+    async signIn({ user, account, profile }: { user: User; account?: Account | null; profile?: Profile | null }) {
       if (account?.provider === "google") {
         const email = user.email ?? profile?.email
         if (!email) return false
@@ -51,13 +52,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         let existing
         try {
           existing = await db.user.findUnique({ where: { email } })
-        } catch (err: any) {
-          console.error('DB error during signIn findUnique:', err?.message ?? err)
-          // Fail closed to avoid accidental account creation when DB can't be reached
+        } catch (err) {
+          const errorObj = err instanceof Error ? err : new Error("Unknown DB error during signIn")
+          console.error('DB error during signIn findUnique:', errorObj.message)
           return false
         }
         if (existing && existing.id !== user.id) {
-          // Link Google account to existing user, then prevent duplicate user
           await db.account.upsert({
             where: {
               provider_providerAccountId: {
@@ -90,12 +90,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             },
           })
 
-          // delete the temp user Auth.js may have created
           if (user.id && user.id !== existing.id) {
             try {
               await db.user.delete({ where: { id: user.id } })
-            } catch (err: any) {
-              console.error('Failed to delete duplicate user:', err?.message ?? err)
+            } catch (err) {
+              const errorObj = err instanceof Error ? err : new Error("Unknown error deleting duplicate user")
+              console.error('Failed to delete duplicate user:', errorObj.message)
               return false
             }
           }
@@ -103,19 +103,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return true
     },
-    async jwt({ token, user }: { token: any, user: any }) {
+    async jwt({ token, user }: { token: JWT; user?: User | undefined }): Promise<JWT> {
       if (user) {
         token.id = user.id
       }
       return token
     },
-    async session({ session, token }: { session: any, token: any }) {
+    async session({ session, token }: { session: Session; token: JWT }): Promise<Session> {
       if (session.user && token.id) {
-        session.user.id = token.id as string;
+        session.user.id = token.id as string
       } else {
         console.warn("Session callback missing user or token.id", { session, token });
       }
-      return session;
+      return session
     }
 
   },

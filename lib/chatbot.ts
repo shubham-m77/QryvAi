@@ -46,7 +46,7 @@ ${new Date().toUTCString()}
 `
     },
   ];
-  const message = cache.get(chatId) ?? baseMsg;
+  const message = cache.get<any[]>(chatId) ?? baseMsg;
   const tools = [
     {
       type: "function",
@@ -74,64 +74,80 @@ ${new Date().toUTCString()}
   })
   const MAX_RETRIES = 10;
   let count = 0;
-  while (true) {
-    if (count++ > MAX_RETRIES) {
-      return "Error: Maximum retries exceeded!";
-    }
-    const completion = await groq.chat.completions.create({
-      temperature: 0,
-      model: "llama-3.3-70b-versatile",
-      messages: message,
-      tools: tools,
-      tool_choice: "auto"
-    });
 
-    const msg = completion.choices[0].message;
-    const toolCalls = msg.tool_calls;
-
-    if (!toolCalls) {
-      // unwrap content properly
-      let answer;
-      if (Array.isArray(msg.content)) {
-        answer = msg.content
-          .filter((c: any) => c.type === "text")
-          .map((c: any) => c.text)
-          .join("\n");
-      } else {
-        answer = msg.content;
+  try {
+    while (true) {
+      if (count++ > MAX_RETRIES) {
+        return "Error: Maximum retries exceeded!";
       }
-      cache.set(chatId, [...message]);
-      return answer;
-    }
+      const completion = await groq.chat.completions.create({
+        temperature: 0,
+        model: "llama-3.3-70b-versatile",
+        messages: message,
+        tools: tools,
+        tool_choice: "auto"
+      });
 
-    // handle each tool call
-    for (const tool of toolCalls) {
-      const funcName = tool.function.name;
-      const args = JSON.parse(tool.function.arguments || '{}');
+      const msg = completion.choices[0].message;
+      const toolCalls = msg.tool_calls;
 
-      if (funcName === "webSearch") {
-        const result = await webSearch(args);
+      if (!toolCalls) {
+        // unwrap content properly
+        let answer;
+        if (Array.isArray(msg.content)) {
+          answer = msg.content
+            .filter((c: any) => c.type === "text")
+            .map((c: any) => c.text)
+            .join("\n");
+        } else {
+          answer = msg.content;
+        }
+        cache.set(chatId, [...message]);
+        return answer;
+      }
 
-        // push assistant message with tool_call info
-        message.push({
-          role: "assistant",
-          tool_calls: [tool] // echo back the tool call
-        });
+      // handle each tool call
+      for (const tool of toolCalls) {
+        const funcName = tool.function.name;
+        const args = JSON.parse(tool.function.arguments || '{}');
 
-        // push tool result
-        message.push({
-          role: "tool",
-          tool_call_id: tool.id,
-          content: result
-        });
+        if (funcName === "webSearch") {
+          const result = await webSearch(args);
+
+          // push assistant message with tool_call info
+          message.push({
+            role: "assistant",
+            tool_calls: [tool] // echo back the tool call
+          });
+
+          // push tool result
+          message.push({
+            role: "tool",
+            tool_call_id: tool.id,
+            content: result
+          });
+        }
       }
     }
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("generateChat failed:", errorMessage);
+
+    if (
+      errorMessage.includes("API key expired") ||
+      errorMessage.includes("API_KEY_INVALID") ||
+      errorMessage.includes("Bad Request")
+    ) {
+      return "The AI assistant is unavailable because the configured API key is expired. Please renew GEMINI_API_KEY.";
+    }
+
+    return "The AI assistant is unavailable right now. Please try again later.";
   }
 }
 
 
 async function webSearch({ query }: { query: string }) {
-  const res = await tvly.search({ query });
+  const res = await tvly.search(query as string);
   const finalRes = res.results.map((item: any) => item.content).join("\n\n");
   return finalRes;
 }

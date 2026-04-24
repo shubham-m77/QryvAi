@@ -1,27 +1,27 @@
 import { useState } from "react";
-import { toast } from "sonner"
+import { toast } from "sonner";
 
-export const useFetch = (cb: any) => {
-    const [data, setData] = useState<any>(null);
-    const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(true);
+export const useFetch = <TResponse = unknown, TArgs extends unknown[] = unknown[]>(cb: (...args: TArgs) => Promise<TResponse>) => {
+    const [data, setData] = useState<TResponse | null>(null);
+    const [error, setError] = useState<Error | null>(null);
+    const [loading, setLoading] = useState(false);
 
-    const fn = async (...args: any) => {
+    const fn = async (...args: TArgs): Promise<TResponse | undefined> => {
+        setLoading(true);
         try {
             const response = await cb(...args);
             setData(response);
             setError(null);
-        }
-        catch (err: any) {
-            setError(err);
-            toast.error(err.message, { style: { background: 'red' } })
-        }
-        finally {
+            return response;
+        } catch (err) {
+            const errorObj = err instanceof Error ? err : new Error("An unexpected error occurred.");
+            setError(errorObj);
+            toast.error(errorObj.message, { style: { background: 'red' } });
+            return undefined;
+        } finally {
             setLoading(false);
         }
-
     };
 
-
     return { data, error, loading, fn, setData };
-}
+};

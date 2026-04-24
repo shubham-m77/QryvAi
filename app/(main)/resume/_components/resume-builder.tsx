@@ -12,16 +12,15 @@ import { useEffect, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import EntryForm from "./entry-form"
 import { entriesToMarkdown } from "@/lib/resumeHelper"
-import MDEditor, { image } from "@uiw/react-md-editor"
-import { auth } from "@/lib/auth"
-import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min.js'
+import MDEditor, { PreviewType } from "@uiw/react-md-editor"
 import { toast } from "sonner"
 
-const ResumeBuilder = async ({ initialContent }: { initialContent: string }) => {
-    const { user } = await auth()
-    const [activeTab, setActiveTab] = useState<any>('edit');
-    const [resumeMode, setResumeMode] = useState('preview');
-    const [previewContent, setPreviewContent] = useState<any>(initialContent);
+const ResumeBuilder = ({ initialContent = '', userName = 'Resume' }: { initialContent?: string, userName?: string }) => {
+    const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
+    const [resumeMode, setResumeMode] = useState<PreviewType>('preview');
+    const [previewContent, setPreviewContent] = useState<string>(initialContent ?? '');
+    const handleTabChange = (value: string) => setActiveTab(value as 'edit' | 'preview');
+    const handlePreviewChange = (value?: string) => setPreviewContent(value ?? '');
     const [isGenerating, setIsGenerating] = useState(false);
     const {
         control,
@@ -55,9 +54,9 @@ const ResumeBuilder = async ({ initialContent }: { initialContent: string }) => 
     useEffect(() => {
         if (activeTab === "edit") {
             const newContent = getCombinedContent();
-            setPreviewContent(newContent ? newContent : initialContent);
+            setPreviewContent(newContent ? newContent : initialContent ?? '');
         }
-    }, [activeTab, formValues])
+    }, [activeTab, formValues, initialContent])
 
     useEffect(() => {
         if (saveResult && !isSaving) {
@@ -67,7 +66,7 @@ const ResumeBuilder = async ({ initialContent }: { initialContent: string }) => 
     }, [isSaving, saveResult, saveError])
     const onSubmit = async () => {
         try {
-            await saveResumeFn(previewContent);
+            await saveResumeFn({ content: previewContent });
         } catch (error) {
             console.error("Save Resume Error:", error);
         }
@@ -81,7 +80,7 @@ const ResumeBuilder = async ({ initialContent }: { initialContent: string }) => 
         if (contactInfo.mobile) parts.push(`📞 ${contactInfo.mobile}`);
         if (contactInfo.linkedIn) parts.push(`💼 [LinkedIn](${contactInfo.linkedIn})`);
         if (contactInfo.twitter) parts.push(`🐦 [Twitter](${contactInfo.twitter})`);
-        return parts.length > 0 ? `## <div align="center">${user.fullName}</div>\n\n<div align="center">\n\n${parts.join(' | ')}\n\n</div>` : '';
+        return parts.length > 0 ? `## <div align="center">${userName}</div>\n\n<div align="center">\n\n${parts.join(' | ')}\n\n</div>` : '';
     }
 
     const getCombinedContent = () => {
@@ -99,17 +98,27 @@ const ResumeBuilder = async ({ initialContent }: { initialContent: string }) => 
     const generatePDF = async () => {
         setIsGenerating(true);
         try {
-            const elem = document.querySelector("#resume-pdf");
+            if (typeof window === 'undefined') {
+                throw new Error("PDF generation is only available in the browser.");
+            }
+
+            const elem = document.querySelector<HTMLElement>("#resume-pdf");
+            if (!elem) {
+                throw new Error("Resume preview container not found for PDF generation.");
+            }
+
+            const html2pdf = (await import('html2pdf.js')).default;
             const opt = {
                 margin: [15, 15],
-                filename: `${user.fullName.replace(" ", "_")}_Resume.pdf`,
+                filename: `${(userName || 'Resume').replace(/\s+/g, '_')}_Resume.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             }
-            await html2pdf.set(opt).from(elem).save();
+            await html2pdf().set(opt).from(elem).save();
         } catch (error) {
             console.error("PDF Generation Error:", error);
+            toast.error("Unable to generate PDF. Please try again in the browser.");
         }
         finally {
             setIsGenerating(false);
@@ -117,16 +126,16 @@ const ResumeBuilder = async ({ initialContent }: { initialContent: string }) => 
     }
     return (
         <div className="space-y-4">
-            <div>
+            <div className="gap-4 flex flex-col md:flex-row justify-between items-center ">
                 <h1 className="font-bold gradient-title text-5xl">Resume Builder</h1>
-                <div className="flex flex-col md:flex-row justify-between sapce-x-4 items-center">
+                <div className="flex flex-col md:flex-row justify-between space-x-4 items-center ">
                     <Button variant={'destructive'} disabled={isSaving} onClick={onSubmit}>{
                         isSaving ? (<><Loader2 className="size-4 animate-spin mr-2" /> Saving...</>) : (
                             <><Save className="size-4 mr-1" /> Save</>)}</Button>
                     <Button disabled={isGenerating} onClick={generatePDF}>{isGenerating ? (<><Loader2 className="size-4 animate-spin" /> Generating PDF...</>) : (<><Download className="size-4" /> Download PDF</>)}</Button>
                 </div>
             </div>
-            <Tabs value={activeTab} onValueChange={setActiveTab} >
+            <Tabs value={activeTab} onValueChange={handleTabChange} >
                 <TabsList>
                     <TabsTrigger value="edit">Form</TabsTrigger>
                     <TabsTrigger value="preview">Markdown</TabsTrigger>
@@ -247,7 +256,7 @@ const ResumeBuilder = async ({ initialContent }: { initialContent: string }) => 
                         )
                     }
                     <div className="border rounded-lg">
-                        <MDEditor value={previewContent} onChange={setPreviewContent} height={800} preview={resumeMode} />
+                        <MDEditor value={previewContent} onChange={handlePreviewChange} height={800} preview={resumeMode} />
                     </div>
                     <div className="hidden" >
                         <div id='resume-pdf'>

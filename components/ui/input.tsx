@@ -2,7 +2,11 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+type InputProps = React.ComponentProps<"input"> & {
+  error?: unknown
+}
+
+function Input({ className, type, error, ...props }: InputProps) {
   return (
     <input
       type={type}

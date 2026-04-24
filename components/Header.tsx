@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import profilePic from "@/assets/profile-pic.jpg";
 import { Button } from "./ui/button";
 import {
+  Brain,
   ChevronDown,
   FileIcon,
   GraduationCap,
@@ -95,9 +96,9 @@ const Header = () => {
                   <ChevronDown className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              <DropdownMenuContent className="mt-4">
                 <DropdownMenuItem asChild>
-                  <Link href="/resume-maker" className="flex gap-1 items-center font-semibold">
+                  <Link href="/resume" className="flex gap-1 items-center font-semibold">
                     <FileIcon className="size-4" />
                     <span>Build Resume</span>
                   </Link>
@@ -109,9 +110,15 @@ const Header = () => {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/interview-prep" className="flex gap-1 items-center font-semibold">
+                  <Link href="/interview" className="flex gap-1 items-center font-semibold">
                     <GraduationCap className="size-4" />
                     <span>Interview Prep...</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/chatbot" className="flex gap-1 items-center font-semibold">
+                    <Brain className="size-4" />
+                    <span>AI Chatbot</span>
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>

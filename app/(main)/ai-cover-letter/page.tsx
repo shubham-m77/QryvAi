@@ -15,7 +15,11 @@ const AICoverLetterPage = async () => {
 	return <div className="mt-16 ">
 		<div className="flex items-center justify-between ">
 			<h1 className="text-3xl font-bold mb-5 gradient-title">My Cover Letters</h1>
-			<Button><Plus className="size-2 mr-2" /> Create New</Button>
+			<Link href="/ai-cover-letter/new">
+				<Button>
+					<Plus className="size-2 mr-2" /> Create New
+				</Button>
+			</Link>
 		</div>
 		<CoverLetterList coverLetters={coverLetters} />
 	</div>

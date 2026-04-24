@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { Edit2, Eye, Trash2 } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
     Card,
@@ -25,10 +25,18 @@ import {
 } from "@/components/ui/alert-dialog";
 import { deleteCoverLetter } from "@/actions/cover-letter";
 
-export default function CoverLetterList({ coverLetters }: { coverLetters: any }) {
+type CoverLetter = {
+    id: string;
+    jobTitle: string;
+    companyName: string;
+    createdAt: string | Date;
+    jobDescription: string | null;
+};
+
+export default function CoverLetterList({ coverLetters }: { coverLetters: CoverLetter[] }) {
     const router = useRouter();
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (id: string) => {
         try {
             await deleteCoverLetter(id);
             toast.success("Cover letter deleted successfully!");

@@ -6,7 +6,7 @@ export default function ResumeLayout({
     children,
 }: Readonly<{ children: React.ReactNode }>) {
     return (
-        <div className="px-5 mt-24">
+        <div className="">
             <Suspense
                 fallback={
                     <div className="mt-5 w-full min-h-screen flex justify-center">

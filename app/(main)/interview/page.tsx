@@ -5,7 +5,7 @@ import PerformanceChart from './_components/performance-chart';
 import QuizList from './_components/quiz-list';
 const InterviewPage = async () => {
 	const assessments = await getAssessment();
-	return <div className="mt-16 ">
+	return <div className="">
 		<h1 className="text-3xl font-bold mb-5 gradient-title">Interview Preparation</h1>
 		<div className='space-y-6'>
 			<StatsCard assessments={assessments} />

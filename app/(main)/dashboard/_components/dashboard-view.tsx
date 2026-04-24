@@ -1,20 +1,53 @@
 'use client';
 import { Brain, LineChart, TrendingDown, TrendingUp } from 'lucide-react'
 import React from 'react'
-import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, TooltipProps, ResponsiveContainer } from 'recharts';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 
-const DashboardView = ({ insights }: { insights: any }) => {
-    const salaryData = insights.salaryRange.map((range: any) => ({
-        name: range.role,
-        min: range.min / 1000,
-        max: range.max / 1000,
-        median: range.median / 1000
-    }))
-    const demandLevelColor = (level: any) => {
+type SalaryRangeObject = {
+    role?: string;
+    min?: number;
+    max?: number;
+    median?: number;
+    location?: string;
+};
+
+type SalaryRange = SalaryRangeObject | string | number | boolean | null | Record<string, unknown> | Array<unknown>;
+
+type InsightDetails = {
+    marketOutlook: string;
+    growthRate: number | null;
+    demandLevel: string;
+    topSkills: string[];
+    salaryRange: SalaryRange[];
+    keyTrends: string[];
+    lastUpdated: string | Date;
+    nextUpdate: string | Date;
+}
+
+type ChartPayload = {
+    name?: string;
+    value?: number;
+    payload?: { date?: string };
+}
+
+const DashboardView = ({ insights }: { insights: InsightDetails }) => {
+    const salaryData = insights.salaryRange.map((range) => {
+        const role = typeof range === 'object' && range !== null && 'role' in range ? String((range as any).role) : 'Unknown';
+        const min = typeof range === 'object' && range !== null && 'min' in range ? Number((range as any).min) : 0;
+        const max = typeof range === 'object' && range !== null && 'max' in range ? Number((range as any).max) : 0;
+        const median = typeof range === 'object' && range !== null && 'median' in range ? Number((range as any).median) : 0;
+        return {
+            name: role,
+            min: min / 1000,
+            max: max / 1000,
+            median: median / 1000
+        }
+    })
+    const demandLevelColor = (level: string) => {
         switch (level.toLowerCase()) {
             case 'high':
                 return 'bg-green-500'
@@ -26,7 +59,7 @@ const DashboardView = ({ insights }: { insights: any }) => {
                 return 'bg-gray-500'
         }
     }
-    const marketOutlook = (outlook: any) => {
+    const marketOutlook = (outlook: string) => {
         switch (outlook.toLowerCase()) {
             case 'positive':
                 return { icon: TrendingUp, color: 'text-green-500' }
@@ -38,8 +71,9 @@ const DashboardView = ({ insights }: { insights: any }) => {
                 return { icon: LineChart, color: 'text-gray-500' }
         }
     }
-    const OutlookIcon = marketOutlook(insights.marketOutlook).icon;
-    const outlookColor = marketOutlook(insights.marketOutlook).color;
+    const outlookMeta = marketOutlook(insights.marketOutlook);
+    const OutlookIcon = outlookMeta.icon;
+    const outlookColor = outlookMeta.color;
 
     const lastUpdatedDate = format(new Date(insights.lastUpdated), "dd/MM/yyyy")
     const nextUpdatedDistance = formatDistanceToNow(new Date(insights.nextUpdate), { addSuffix: true })
@@ -68,8 +102,8 @@ const DashboardView = ({ insights }: { insights: any }) => {
                         <TrendingUp className={`w-4 h-4 text-muted-foreground`} />
                     </CardHeader>
                     <CardContent>
-                        <div className='text-2xl font-bold'>{insights.growthRate.toFixed(1)}%</div>
-                        <Progress value={insights.growthRate} className='mt-2' />
+                        <div className='text-2xl font-bold'>{insights.growthRate !== null ? `${insights.growthRate.toFixed(1)}%` : 'N/A'}</div>
+                        <Progress value={insights.growthRate ?? 0} className='mt-2' />
                     </CardContent>
                 </Card>
 

@@ -11,10 +11,10 @@ if (!geminiApiKey) {
 }
 const genAI = new GoogleGenerativeAI(geminiApiKey);
 const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash"
+    model: "gemini-3-flash-preview"
 });
 
-export async function saveResume(content: { content: string }) {
+export async function saveResume({ content }: { content: string }) {
     const session = await auth();
     const userId = session?.user?.id
 
@@ -35,7 +35,12 @@ export async function saveResume(content: { content: string }) {
             },
             create: {
                 id: userId,
-                content
+                content,
+                user: {
+                    connect: {
+                        id: userId,
+                    },
+                },
             }
         })
         revalidatePath("/resume");
@@ -64,7 +69,7 @@ export async function getResume() {
                 id: userId,
             }
         })
-        revalidatePath("/resume");
+        // revalidatePath("/resume");
         return resume;
     } catch (error: any) {
         console.error("Error on saving resume:", error);

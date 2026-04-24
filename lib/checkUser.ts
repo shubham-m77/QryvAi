@@ -6,26 +6,28 @@ export const checkUser = async () => {
   if (!session?.user) return null
 
   try {
-    // Try to find user in DB by email
+    const email = session.user.email
+    if (!email) return null
+
     const loggedInUser = await db.user.findUnique({
-      where: { email: session.user.email! },
-      include: { accounts: true, sessions: true }, // helpful if you want linked data
+      where: { email },
+      include: { accounts: true, sessions: true },
     })
 
     if (loggedInUser) return loggedInUser
 
-    // If not found → create new user
     const newUser = await db.user.create({
       data: {
-        email: session.user.email!,
+        email,
         name: session.user.name || null,
         image: session.user.image || null,
       },
     })
 
     return newUser
-  } catch (err: any) {
-    console.error("Error in checkUser:", err.message)
+  } catch (err) {
+    const errorObj = err instanceof Error ? err : new Error("Unknown error in checkUser")
+    console.error("Error in checkUser:", errorObj.message)
     return null
   }
 }
