@@ -82,7 +82,7 @@ ${new Date().toUTCString()}
       }
       const completion = await groq.chat.completions.create({
         temperature: 0,
-        model: "llama-3.3-70b-versatile",
+        model: "openai/gpt-oss-120b",
         messages: message,
         tools: tools,
         tool_choice: "auto"

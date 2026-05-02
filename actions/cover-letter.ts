@@ -70,7 +70,7 @@ export async function generateCoverLetter(data: CoverLetterInput) {
         throw new Error("GEMINI_API_KEY environment variable is not set");
     }
     const genAI = new GoogleGenerativeAI(geminiApiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
     for (let attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt += 1) {
         try {

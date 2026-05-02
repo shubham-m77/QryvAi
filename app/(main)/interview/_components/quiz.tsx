@@ -27,13 +27,13 @@ export const Quiz = () => {
     } = useFetch(saveQuizResults);
 
     useEffect(() => {
-        if (quizData) {
-            setAnswers(new Array(quizData.questions.length).fill(""));
+        if (quizData && Array.isArray(quizData)) {
+            setAnswers(new Array(quizData.length).fill(""));
         }
     }, [quizData]);
 
     const handleNext = () => {
-        if (currentQuestion < quizData.length - 1) {
+        if (quizData && currentQuestion < quizData.length - 1) {
             setCurrentQuestion(currentQuestion + 1);
             setShowExplaination(false);
         }
@@ -43,20 +43,24 @@ export const Quiz = () => {
     }
 
     const calculateTestScore = () => {
+        if (!quizData || !Array.isArray(quizData)) return 0;
         let correct = 0;
         answers.forEach((ans: any, index: number) => {
-            if (ans == quizData[index].correctAnswer) {
+            if (ans == quizData[index]?.correctAnswer) {
                 correct++;
             }
         })
         return (correct / quizData.length) * 100
     }
     const finishQuiz = async () => {
-        let score = 0;
-        score = calculateTestScore()
+        if (!quizData || !Array.isArray(quizData)) {
+            toast.error("Invalid quiz data");
+            return;
+        }
+        const score = calculateTestScore();
         try {
             await saveQuizFn(quizData, answers, score);
-            toast.success("Test Completed")
+            toast.success("Test Completed");
         } catch (error: any) {
             toast.error(error.message || "Unable to save test results!");
         }
@@ -96,7 +100,16 @@ export const Quiz = () => {
             </Card>
         )
     }
-    const question = quizData[currentQuestion];
+    const question = quizData?.[currentQuestion];
+    if (!question) {
+        return (
+            <Card className="gap-2 w-full flex flex-col mx-2">
+                <CardContent className="pt-6">
+                    <p className="text-center text-muted-foreground">No question available</p>
+                </CardContent>
+            </Card>
+        );
+    }
     return (
         <Card className=" mx-2">
             <CardHeader>
@@ -105,7 +118,7 @@ export const Quiz = () => {
             <CardContent className="gap-y-4">
                 <p className="text-base text-muted-foreground">{question?.question}</p>
                 <div className="space-y-2">
-                    {question?.options.map((option: any, index: number) => {
+                    {question?.options?.map((option: any, index: number) => {
                         return (<Button
                             key={index}
                             variant={answers[currentQuestion] === option ? "default" : "outline"}
@@ -123,8 +136,8 @@ export const Quiz = () => {
                 </div>
                 {showExplaination &&
                     <div className="mt-4 p-4 bg-muted rounded-lg">
-                        <p className="font-medium ">Explaination:</p>
-                        <p className="text-muted-foreground">{question.explaination}</p>
+                        <p className="font-medium ">Explanation:</p>
+                        <p className="text-muted-foreground">{question.explanation}</p>
                     </div>}
             </CardContent>
             <CardFooter>
@@ -136,7 +149,7 @@ export const Quiz = () => {
                     )
                 }
 
-                <Button onClick={handleNext} className="ml-auto" disabled={!answers[currentQuestion] || savingResult}>
+                <Button onClick={handleNext} className="ml-auto flex items-center" disabled={!answers[currentQuestion] || savingResult}>
                     {
                         savingResult && <Loader2 className="mt-4 animate-spin" width={'100%'} color="gray" />
                     }

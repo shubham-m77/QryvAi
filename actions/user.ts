@@ -106,3 +106,35 @@ export const getUserOnboardingStatus = async () => {
         throw new Error("Failed to get onboarding status: " + error.message);
     }
 };
+
+export const getUser = async () => {
+    const session = await auth();
+    const userId = session?.user?.id;
+
+    if (!userId) {
+        throw new Error("Unauthorized!");
+    }
+
+    try {
+        const user = await db.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                image: true,
+                industry: true,
+                bio: true,
+                experience: true,
+                skills: true,
+                createdAt: true,
+            },
+        });
+
+        if (!user) throw new Error("User not found");
+
+        return user;
+    } catch (error: any) {
+        throw new Error("Failed to get user: " + error.message);
+    }
+};

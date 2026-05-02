@@ -24,7 +24,6 @@ model User {
   coverLetter      CoverLetter[]
   resumes          Resume?
   sessions         Session[]
-  industryInsights IndustryInsight? @relation(fields: [industry], references: [industry])
 }
 
 model VerificationToken {
@@ -112,7 +111,6 @@ model IndustryInsight {
   recommendedSkills String[]
   lastUpdated       DateTime      @default(now())
   nextUpdate        DateTime
-  users             User[]
 
   @@index([industry])
 }

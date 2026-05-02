@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { z } from "zod"
 import { signinSchema } from "@/lib/validations"
 import { signIn } from "next-auth/react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,11 +13,20 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { FcGoogle } from "react-icons/fc"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 
 type FormValues = z.infer<typeof signinSchema>
 export default function SignInPage() {
   const router = useRouter()
+  const { data: session } = useSession()
   const [loading, setLoading] = useState(false)
+
+  // Redirect if already logged in (useEffect avoids render-time navigation)
+  useEffect(() => {
+    if (session?.user) {
+      router.replace("/dashboard")
+    }
+  }, [session, router])
 
   const form = useForm<FormValues>({
     resolver: zodResolver(signinSchema),

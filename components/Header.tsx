@@ -58,10 +58,10 @@ const Header = () => {
       {/* Outer border */}
       <div className={`${isScrolled ? "border-b-1" : "glowing-border rounded-full border-1"}  border-gray-400/50  h-16`}>
         {/* Inner content */}
-        <div className="inner flex items-center justify-between px-8 md:px-16 h-full bg-gray-800/20 backdrop-blur-md">
+        <div className="inner flex items-center justify-between px-6 sm:px-8 md:px-16 h-full bg-gray-800/20 backdrop-blur-md">
           {/* Logo */}
           <Link
-            className="text-[#ECFDF5] text-2xl md:text-3xl font-bold font-novatica"
+            className="text-[#ECFDF5] text-xl md:text-3xl font-bold font-novatica"
             href="/"
           >
             Qryv
@@ -71,7 +71,7 @@ const Header = () => {
           </Link>
 
           {/* Right Side */}
-          <div className="flex items-center gap-x-4">
+          <div className="flex items-center  gap-x-2 md:gap-x-4">
             {session?.user ? (
               <Link href="/dashboard">
                 <Button className="hover:bg-gray-800 border hover:border-gray-500 text-gray-100 border-muted bg-inherit cursor-pointer">

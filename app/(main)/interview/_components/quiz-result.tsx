@@ -30,8 +30,9 @@ const QuizResult = ({ result, onStartNew, hideStartNew = false }: { result: any,
                 <div className='space-y-4'>
                     <h3 className='font-medium'>Question Review</h3>
                     {result.questions.map((q: any, index: number) => (
+                        
                         <div key={index} className="p-4 border border-muted space-y-2 rounded-lg">
-                            <div className='flex items-start justify-center gap-2 '>
+                            <div className='flex items-start  gap-2 '>
                                 <p className="font-medium">{q.question}</p>
                                 {q.isCorrect ? (
                                     <CheckCircle className='size-5 text-green-500 flex-shrink-0' />
@@ -43,10 +44,12 @@ const QuizResult = ({ result, onStartNew, hideStartNew = false }: { result: any,
                                 <p>Your Answer: {q.selectedAnswer}</p>
                                 {!q.isCorrect && <p>Correct Answer: {q.correctAnswer}</p>}
                             </div>
-                            <div className="text-m bg-muted p-2 rounded">
-                                <p className="font-medium">Explanation:</p>
-                                <p>{q.explanation}</p>
-                            </div>
+                            { q.explanation && (
+                                <div className="text-m bg-muted p-2 rounded">
+                                    <p className="font-medium">Explanation:</p>
+                                    <p>{q.explanation}</p>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>

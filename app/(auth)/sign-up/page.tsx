@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { signupSchema } from "@/lib/validations"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,12 +14,21 @@ import { Separator } from "@/components/ui/separator"
 import { signIn } from "next-auth/react"
 import { FcGoogle } from "react-icons/fc"
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 type FormValues = z.infer<typeof signupSchema>
 
 export default function SignupPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
+
+  // Redirect if already logged in (useEffect avoids render-time navigation)
+  useEffect(() => {
+    if (session?.user) {
+      router.replace("/dashboard")
+    }
+  }, [session, router])
 
   const form = useForm<FormValues>({
     resolver: zodResolver(signupSchema),
@@ -47,8 +56,7 @@ export default function SignupPage() {
       form.setError("email", { message: data.error ?? "Signup failed" })
     }
   }
-
-
+  
   return (
     <div className="w-full flex items-center justify-center mt-16">
       <Card className="w-full max-w-md shadow-xl rounded-2xl">

@@ -24,6 +24,7 @@ type InsightDetails = {
     topSkills: string[];
     salaryRange: SalaryRange[];
     keyTrends: string[];
+    recommendedSkills?: string[];
     lastUpdated: string | Date;
     nextUpdate: string | Date;
 }
@@ -182,23 +183,27 @@ const DashboardView = ({ insights }: { insights: InsightDetails }) => {
                         <CardDescription className='text-xs text-gray-400'>Current trends shaping the industry</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <ul>
-                            { }
+                        <ul className='space-y-4'>
+                            {insights.keyTrends.map((trend: any, index: number) => (
+                                <li key={index} className='text-sm font-semibold flex items-start gap-1'><div className='bg-primary size-2 mt-2 rounded-full'></div>{trend}</li>
+                            ))}
                         </ul>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader className='flex flex-col items-center pb-2'>
-                        <CardTitle className='text-sm font-bold'>Key Industry Trends</CardTitle>
-                        <CardDescription className='text-xs text-gray-400'>Current trends shaping the industry</CardDescription>
+                        <CardTitle className='text-sm font-bold'>Recommended Skills</CardTitle>
+                        <CardDescription className='text-xs text-gray-400'>Skills to develop for career growth</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <ul className='space-y-4'>
-                            {insights.keyTrends.map((trend: any, index: number) => (
-                                <li key={index} className='text-sm font-semibold flex items-start gap-1'><div className='bg-primary size-2 mt-2 rounded-full'></div>{trend}</li>
-                            ))}
-                        </ul>
+                        <div className='flex flex-wrap gap-2'>
+                            {(insights as any).recommendedSkills?.map((skill: string, index: number) => (
+                                <Badge key={index} variant={'outline'} className='text-sm'>
+                                    {skill}
+                                </Badge>
+                            )) || <p className='text-sm text-muted-foreground'>No recommendations available</p>}
+                        </div>
                     </CardContent>
                 </Card>
             </div>

@@ -10,7 +10,7 @@ if (!geminiApiKey) {
 }
 const genAI = new GoogleGenerativeAI(geminiApiKey);
 const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash"
+    model: "gemini-3-flash-preview"
 });
 
 export async function generateQuiz() {
@@ -35,7 +35,7 @@ export async function generateQuiz() {
         "question": "string",
         "options": ["string", "string", "string", "string"],
         "correctAnswer": "string",
-        "explaination": "string"
+        "explanation": "string"
         }]
         }
     `;
@@ -64,7 +64,7 @@ export async function saveQuizResults(questions: any[], answers: string[], score
         selectedAnswer: answers[index],
         correctAnswer: q.correctAnswer,
         isCorrect: answers[index] === q.correctAnswer,
-        explanation: q.explanation
+        explanation: q.explanation || q.explaination
     }));
     const wrongAnswers = questionResults.filter((q: any) => !q.isCorrect);
     let improvementTip = null;
